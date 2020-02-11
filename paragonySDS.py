@@ -89,6 +89,47 @@ def summary(mail_index, results):
     return round(grs, 2), round(net, 2), round(tax, 2), cnt
 
 
+def raportPDF(rap1, rap2, date, reg_name):
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+
+    canv = canvas.Canvas('file.pdf', pagesize=A4)
+    width, height = A4
+
+    rap1 = rap1.replace("\t", "    ")
+    rap2 = rap2.replace("\t", "    ")
+    rap1 = rap1.replace("ł", "l")
+    rap1 = rap1.replace("ś", "s")
+    rap1 = rap1.replace("ą", "a")
+
+    h = 80
+    canv.drawString(40, (height - h), "Wygenerowanie raportu: " + datetime.date.today().strftime("%d-%m-%Y"))
+    h += 20
+    canv.drawString(40, (height - h), "Raport z dnia: " + date.get())
+    h += 20
+    canv.drawString(40, (height - h), "Kasa fiskalna: " + reg_name.get())
+    h += 40
+
+    for i in range(len(rap1.split("\n"))):
+        canv.drawString(50, (height - h), rap1.split("\n")[i])
+        canv.drawString(220, (height - h), rap2.split("\n")[i])
+        h += 20
+    for i in range(54):
+        canv.drawString(40, (height - i*10 -145), "|")
+        canv.drawString(210, (height - i*10 -145), "|")
+        canv.drawString(380, (height - i*10 -145), "|")
+    for i in range(114):
+        canv.drawString(i*3+40, (height - 140), "-")
+        canv.drawString(i*3+40, (height - 220), "-")
+        canv.drawString(i*3+40, (height - 400), "-")
+        canv.drawString(i*3+40, (height - 580), "-")
+        canv.drawString(i*3+40, (height - 680), "-")
+    canv.showPage()
+    canv.save()
+    import os
+    os.system("file.pdf")
+
+
 def raport(window, imap, login, psw, date, mail_from, folder, reg_name):
     # grab data from entries
     imap_server = imap.get()
@@ -170,6 +211,7 @@ def raport(window, imap, login, psw, date, mail_from, folder, reg_name):
     if len(mail_index) != cnt_charge:
         messagebox.showinfo("Błąd", "Niezgodna liczba raportów")
 
+    raportPDF(rap1, rap2, date, reg_name)
 
 def main():
     window = tk.Tk()
